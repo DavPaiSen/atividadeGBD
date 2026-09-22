@@ -1,27 +1,28 @@
 /*
  * Autores: seunome seunromatricula
+    Júlia Yasmin Silva Guimarães BCC
  */
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-#define ATIVO 'a'
-
 class MeuArquivo {
 public:
     struct cabecalho { int quantidade; int disponivel; } cabecalho;
     struct registro { int tamanho; char status; char palavra[50]; } registro;
 
-    struct livre {
-        int tamanho;
-        int proximo;
-    };
     // construtor: abre arquivo. Essa aplicacao deveria ler o arquivo se existente ou criar um novo.
     // Entretando recriaremos o arquivo a cada execucao ("wb+").
+    void atualizaCabecalho(){
+        fseek(fd,0, SEEK_SET);
+        fwrite(&cabecalho, size(struct cabecalho),1, fd);
+    }
     MeuArquivo() {
         fd = fopen("dados.dat","wb+");
-		// inserir o cabeçalho
+        cabecalho.disponivel=0;
+        cabecalho.quantidade=0;
+        atualizaCabecalho();
     }
 
     // Destrutor: fecha arquivo
@@ -42,23 +43,9 @@ public:
     // BuscaPalavra: retorno é o offset para o registro
     // Nao deve considerar registro removido
     int buscaPalavra(char *palavra) {
-        
-        fseek(fd, 0, 0);
-        fread(&cabecalho, sizeof(cabecalho), 1, fd); //le o cabecalho
+        // implementar aqui
 
-        fseek(fd, sizeof(cabecalho), 0);//ponteiro posicionado depois do cabecalho
-
-        int tamanho;
-        char status;
-
-        while (true) {
-            if ((fread(&tamanho, sizeof(int), 1, fd) != 1) || (fread(&status, sizeof(char), 1, fd) != 1)){ //nao conseguiu ler tamanho ou status do arquivo
-                continue;
-            }
-        }
-
-        if (status == ATIVO) {}
-
+        // retornar -1 caso nao encontrar
         return -1;
     }
 
