@@ -1,6 +1,6 @@
 /*
  * Autores: seunome seunromatricula
-    Júlia Yasmin Silva Guimarães BCC
+    Júlia Yasmin Silva Guimarães 124BCC013
  */
 
 #include <stdlib.h>
