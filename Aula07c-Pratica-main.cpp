@@ -9,11 +9,13 @@
 #include <string.h>
 
 #define ATIVO 'a'
+#define REMOVIDO 'r'
 
 class MeuArquivo {
 public:
     struct cabecalho { int quantidade; int disponivel; } cabecalho;
     struct registro { int tamanho; char status; char palavra[50]; } registro;
+    typedef struct {int tamanho; char status; int proximo;} blocoDesalocado;
 
     // construtor: abre arquivo. Essa aplicacao deveria ler o arquivo se existente ou criar um novo.
     // Entretando recriaremos o arquivo a cada execucao ("wb+").
@@ -40,7 +42,24 @@ public:
 
     // Marca registro como removido, atualiza lista de disponíveis, incluindo o cabecalho
     void removePalavra(int offset) {
-        // implementar aqui
+        fseek(fd, offset, SEEK_SET);
+
+        int tamanho;
+        if (fread(&tamanho, sizeof(int), 1, fd) != 1) { //nao conseguiu ler o bloco
+            return;
+        }
+
+        blocoDesalocado blocoDesalocado;
+        blocoDesalocado.tamanho = tamanho + sizeof(int) + 1;//tamanho eh o tamanho do registro inteiro
+        blocoDesalocado.proximo = cabecalho.disponivel;
+        blocoDesalocado.status = REMOVIDO;
+        cabecalho.disponivel = offset;
+        cabecalho.quantidade--;
+
+        fseek(fd, offset, SEEK_SET);
+        fwrite(&blocoDesalocado, sizeof(blocoDesalocado), 1, fd);
+
+        atualizaCabecalho();
     }
 
     // BuscaPalavra: retorno é o offset para o registro
@@ -50,8 +69,6 @@ public:
         if (fread(&cabecalho, sizeof(struct cabecalho), 1, fd) != 1) {
             return -1; //nao conseguiu achar  o cabecalho
         }
-
-        fseek(fd, sizeof(struct cabecalho), SEEK_SET);//bota o ponteiro no primeiro registro
 
         char buffer[51];
         int tamanho;
@@ -71,9 +88,7 @@ public:
                     return posicao;
                 }
             } else {
-                //pra isso daqui funcionar, na hora de deletar, nao pode fazer mais nada alem de trocar o status!!!
-
-                fseek(fd, tamanho, SEEK_CUR); //pula o bloco
+                fseek(fd, posicao + tamanho, SEEK_SET); //pula o bloco
             }
             
         }
