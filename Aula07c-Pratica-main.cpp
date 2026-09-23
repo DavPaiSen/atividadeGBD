@@ -1,11 +1,14 @@
 /*
- * Autores: seunome seunromatricula
+ * Autores:
     Júlia Yasmin Silva Guimarães 12421BCC013
+    Davi Paiva Sendin 12421BCC004
  */
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#define ATIVO 'a'
 
 class MeuArquivo {
 public:
@@ -16,7 +19,7 @@ public:
     // Entretando recriaremos o arquivo a cada execucao ("wb+").
     void atualizaCabecalho(){
         fseek(fd,0, SEEK_SET);
-        fwrite(&cabecalho, size(struct cabecalho),1, fd);
+        fwrite(&cabecalho, sizeof(struct cabecalho),1, fd);
     }
     MeuArquivo() {
         fd = fopen("dados.dat","wb+");
@@ -43,7 +46,37 @@ public:
     // BuscaPalavra: retorno é o offset para o registro
     // Nao deve considerar registro removido
     int buscaPalavra(char *palavra) {
-        // implementar aqui
+        fseek(fd, 0, SEEK_SET);
+        if (fread(&cabecalho, sizeof(struct cabecalho), 1, fd) != 1) {
+            return -1; //nao conseguiu achar  o cabecalho
+        }
+
+        fseek(fd, sizeof(struct cabecalho), SEEK_SET);//bota o ponteiro no primeiro registro
+
+        char buffer[51];
+        int tamanho;
+        char status;
+
+        while (true) {
+            int posicao = ftell(fd);
+            if ((fread(&tamanho, sizeof(int), 1, fd) != 1) || (fread(&status, 1, 1, fd) != 1)) {
+                break; //nao conseguiu ler o tamanho ou o status do registro
+            }
+
+            if (status == ATIVO) {
+                fread(buffer, 1, tamanho, fd);
+                buffer[tamanho] = '\0';
+
+                if (!strcmp(buffer, palavra)) { //palavras iguais
+                    return posicao;
+                }
+            } else {
+                //pra isso daqui funcionar, na hora de deletar, nao pode fazer mais nada alem de trocar o status!!!
+
+                fseek(fd, tamanho, SEEK_CUR); //pula o bloco
+            }
+            
+        }
 
         // retornar -1 caso nao encontrar
         return -1;
