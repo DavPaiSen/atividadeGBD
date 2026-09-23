@@ -172,7 +172,7 @@ private:
 
 int main(int argc, char** argv) {
     // abrindo arquivo dicionario.txt
-    FILE *f = fopen("dicionario.txt","rt");
+    FILE *f = fopen("Aula07c-Pratica-dicionario.txt","rt");
 
     // se não abriu
     if (f == NULL) {
